@@ -2,6 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 
 function MovieForm() {
+  const [errors, setErrors] = useState(null); 
   const [formData, setFormData] = useState({
     title: "",
     year: new Date().getFullYear(),
@@ -14,17 +15,21 @@ function MovieForm() {
     female_director: false,
   });
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    fetch("/movies", {
+   const response=  fetch("/movies", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
     })
-      .then((response) => response.json())
-      .then((newMovie) => console.log(newMovie));
+    const data = await response.json();
+  if (response.ok) {
+    console.log("Movie created:", data);
+  } else {
+    setErrors(data.errors);
+  }
   }
 
   function handleChange(e) {
@@ -127,6 +132,13 @@ function MovieForm() {
         </FormGroup>
         <SubmitButton type="submit">Add Movie</SubmitButton>
       </form>
+      {errors.length > 0 && (
+        <ul>  
+          {errors.map((error) => ( 
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
+      )}
     </Wrapper>
   );
 }
